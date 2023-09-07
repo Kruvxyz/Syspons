@@ -1,11 +1,12 @@
 """Syspons FSM : a system to summary and answear documents"""
 from fsm.config.config import config
 from fsm.flow.main_flow import Flow1Domain
+from fsm.functions import count_tokens
 from fsm.agent.agent import Agent
 from fsm.agent.resources import gen_system_message
 import click
+import os.path as path
 import openai
-
 
 @click.command()
 @click.option(
@@ -25,48 +26,32 @@ def main(file, output):
     config.set_output_filename(output)
     openai.api_key = config.open_ai_key
 
-    raw_document = None #fixme: consume document from file
+    BUFFER = 0
+    f = open(path.join("documents/", file), "r")
+    raw_document = f.read()
 
     agent_domain_exists = gen_agent_domain_exists(openai)
     agent_domain_question = gen_agent_question(openai)
     flow1_domain_name = Flow1Domain(config, agents = {"init": agent_domain_exists, "questions": agent_domain_question})
-
-    # Make experiments on tested domain
-    chunk_of_text = """
-Kyiv claims Russian drones hit Romania
-Ukraine said on Monday that Russian drones fell on NATO member Romania, following a wave of huge overnight strikes. 
-
-Bucharest "categorically" denied Kyiv's claim. 
-
-Citing information from Ukrainian border guards, Foreign Ministry spokesman Oleg Nikolenko wrote on Facebook: "During a massive attack carried out by Russia in the Izmail port area, Russian shaheds fell and exploded on Romanian territory." 
-
-"This is further confirmation that Russian missile terror poses a huge security threat not only to Ukraine but also to neighbouring countries, including NATO member states," he added.
-
-The Romanian Defence Ministry said it was "monitoring the situation" and "at no time" have Russia's attacks on Ukrainian infrastructure posed a "direct military threat" to Romania or its territorial waters. 
-
-On Monday, Ukraine intercepted 17 Russian drones in the southern Odesa region, which damaged buildings in the Izmail port district, according to a local governor. 
-
-Warehouses and production buildings, agricultural machinery and industrial equipment were damaged," wrote Oleg Kiper on Telegram.
-
-The attack lasted three and a half hours and caused no casualties, he said. 
-
-Izmail's river port has become one of the main exit routes for Ukrainian grain since Moscow ended a deal that allowed Kyiv's export over the Black Sea in July. 
-
-Over the weekend, Russian drones hit industrial sites on the Danube River, said the office of the Prosecutor General of Ukraine.     
-    """
-
-    flow1_domain_name.run(chunk_of_text)
+    
+    print(f""" 
+agent max tokens: {max(agent_domain_exists.get_expected_converation_tokens(), agent_domain_question.get_expected_converation_tokens())}
+docuemnt tokens: {count_tokens(raw_document)}
+buffer: {BUFFER}
+LLM max tokens: {config.max_tokens}
+    """)
+    if max(agent_domain_exists.get_expected_converation_tokens(), agent_domain_question.get_expected_converation_tokens()) + count_tokens(raw_document) < config.max_tokens + BUFFER:
+        flow1_domain_name.run(raw_document)
 
 
 def gen_agent_domain_exists(ai):
     agent_domain_exists_system_message = """
 You are an historian with an experty at international relationship (specializes in the Soviet Union history). 
 You will receive partial text and you should decide if text contain information about the ongoing war in Ukraine and Russia (current year 2023).
-Uupdate list of revenlt players in the conflict (not exclusive):
+Update list of revenlt players in the conflict (not exclusive):
 Vladimir Putin - President of Russia
 Volodymyr Zelenskyy - President of Ukraine
  
-
 GOALS:
 Read text carefully.
 Decide if text contain information about Russia-Ukraine ongoing war.
@@ -81,7 +66,6 @@ Commands:
 end_of_flow: "Text doesn't contain any domain information", args:
 summary: "Text contains domain information", args:
 flag: "Can't decide if text contains domain information", args: "reasoning": "<why you can not make a decision>"
-
 
 Performance Evaluation:
 You are to make sure commands use informative argument and not generic naming or uses brackets to indicate generic arguments.
@@ -136,11 +120,10 @@ def gen_agent_question(ai):
     agent_domain_question_system_message = """
 You are an historian with an experty at international relationship (specializes in the Soviet Union). 
 You are to answear questions about war in Ukraine based on a partial text about the ongoing Russia-Ukriane war.
-Uupdate list of revenlt players in the conflict (not exclusive):
+Update list of revenlt players in the conflict (not exclusive):
 Vladimir Putin - President of Russia
 Volodymyr Zelenskyy - President of Ukraine
  
-
 GOALS:
 Read text carefully.
 Answers questions based on text only in command 'answer'.
@@ -154,7 +137,6 @@ Exclusively use the commands listed in double quotes e.g. "command name"
 Commands:
 answer: "answer following questions detailed in args", args: "players": "<list all players articulated in text>", "events": <"list all events described in text">, "evaluate": <"describe if possible which country get an advantage based on text and what is the advantage">
 flag: "Can't answer", args: "reasoning": "<why you can not make a decision>"
-
 
 Performance Evaluation:
 You are to make sure commands use informative argument and not generic naming or uses brackets to indicate generic arguments.
