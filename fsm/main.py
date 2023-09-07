@@ -38,7 +38,7 @@ def main(file):
 
     agent_domain_exists = gen_agent_domain_exists(openai)
     agent_domain_question = gen_agent_question(openai)
-    flow1_domain_name = Flow1Domain(config, agents = {"exists": agent_domain_exists, "questions": agent_domain_question}, file_name=file)
+    flow1_domain_name = Flow1Domain(config, agents = {"init": agent_domain_exists, "questions": agent_domain_question}, file_name=file)
 
     # Make experiments on tested domain
     chunk_of_text = """

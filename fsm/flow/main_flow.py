@@ -3,13 +3,13 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 class Flow1Domain(AbstractFlow):
   def __init__(self,
-               config: "config",
+               config: "Config",
                agents: Dict[str, "Agent"],
                file_name: Optional[str] = None
     ) -> None:
     super().__init__(config)
     self.agents = agents
-    self.current_agent = self.agents.get("exists", None)
+    self.current_agent = self.agents.get("init", None)
     assert type(self.current_agent) != type(None), "Failed to load initial agent"
 
     if file_name:
@@ -28,7 +28,7 @@ class Flow1Domain(AbstractFlow):
     Update self params befor executing loop
     """
     self.input = content
-    self.current_agent = self.agents["exists"]
+    self.current_agent = self.agents["init"]
     self.state = self.config.STATE_RUN
 
   def execute(self, data: Dict[str,Any]) -> None:
@@ -45,10 +45,18 @@ class Flow1Domain(AbstractFlow):
       print(f"""Flag content {args}""")
       self.state = self.config.STATE_CONTINUE
 
-    elif command == self.config.COMMAND_SUMMARY:
-      self.current_agent = self.agents["summary"]
-      self.input = args.get("summary", "")
-
     elif command == self.config.COMMAND_STORE_AND_END_FLOW:
       self.append_to_file(args.get("summary", ""))
       self.state = self.config.STATE_CONTINUE
+
+    elif command == self.config.COMMAND_SUMMARY:
+      current_agent_state = self.get_current_agent_state()
+      if current_agent_state == "init":
+        self.current_agent = self.agents["summary"]
+      else:
+        self.append_to_file(args.get("summary", ""))
+        self.state = self.config.STATE_CONTINUE
+
+    else:
+      print(f"undefined command {command} with content {args}")
+      print("rerun...")

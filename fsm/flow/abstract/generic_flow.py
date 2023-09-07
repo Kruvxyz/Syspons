@@ -2,7 +2,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from fsm.functions import ParseResponse
 
 class AbstractFlow:
-  def __init__(self, config: "config") -> None:
+  def __init__(self, config: "Config") -> None:
     """
     Define agents here
     """
@@ -15,8 +15,13 @@ class AbstractFlow:
     self.state: str = self.config.STATE_NONE
     self.agent_dict = {}
 
-  def set_agent_dict(self):
+  def set_agent_dict(self) -> None:
     self.agent_dict = {self.agents[name]: name for name in self.agents}
+
+  def get_current_agent_state(self) -> str:
+    current_agent_state = self.agent_dict.get(self.current_agent, None)  
+    assert type(current_agent_state) != type(None), "Current agent state is not defined"
+    return current_agent_state
 
   # def get_max_num_of_tokens(self) -> int:
   #   """
@@ -26,7 +31,7 @@ class AbstractFlow:
   #   return max_tokens - max([agent.get_expected_converation_tokens() for agent in self.agents])
   #   """
   #   return 0
-
+  
   def run(self, content: str) -> Optional[str]:
     """Execute FSM
 
