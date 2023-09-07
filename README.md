@@ -1,7 +1,7 @@
 # Syspons
  AI agent for question answering in a document
 
-#Terminology
+# Terminology
 
 ### **LLM**
 LLM stands for Large Language Model. There are multiple options exists, during this proejct we would refers to ChatGPT-4 (openAI) as the LLM.
