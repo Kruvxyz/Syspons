@@ -1,6 +1,26 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+model_to_tokens = {
+    # DO NOT CHANGE! ORDER IS IMPORTANT, FOR ANY CHANGE VERIFY THAT get_tokens_for_model(model) WORKS CORRECTLY!
+    # https://platform.openai.com/docs/models/gpt-4
+    "gpt-3.5-turbo": 4096,
+    "gpt-3.5-turbo-16k": 16385,
+    "gpt-4": 8192,
+    "gpt-4-32k": 32768,
+    "text-davinci-002": 4097,
+    "code-davinci-002": 8001,
+    "babbage-002": 16384,
+    "davinci-002": 16384
+}
+
+def get_tokens_for_model(model: str) -> int:
+    tokens = 0
+    for m in model_to_tokens:
+        if m in model:
+            tokens = model_to_tokens[m]
+    return tokens
+
 class Config:
     """
     Configuration class to store consts.
@@ -9,7 +29,8 @@ class Config:
     def __init__(self) -> None:
         """Initialize the Config class"""
         self.open_ai_key = os.getenv("API_KEY", "")
-        self.max_tokens = 8192 #gpt-4: https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/chatgpt?pivots=programming-language-chat-completions
+        self.model = os.getenv("OPENAI_MODEL", "gpt-4")
+        self.max_tokens = get_tokens_for_model(self.model)
         self.file_name = "temporary.txt" # should be overwrite
         self.output_file_name = "output.txt" # should be overwrite
         

@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from fsm.functions import count_tokens
+from fsm.config import config
 
 class Agent:
   def __init__(self,
@@ -26,7 +27,7 @@ class Agent:
         max_tokens = self.answer_max_tokens if self.answer_max_tokens else 0
         max_tokens = answer_max_tokens if answer_max_tokens else max_tokens
         resp = self.ai.ChatCompletion.create(
-          model="gpt-4",
+          model=config.model,
           messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": self.prompt_generator(user_input)},
@@ -36,7 +37,7 @@ class Agent:
 
     else:
       resp = self.ai.ChatCompletion.create(
-        model="gpt-4",
+        model=config.model,
         messages=[
               {"role": "system", "content": self.system_prompt},
               {"role": "user", "content": self.prompt_generator(user_input)},
