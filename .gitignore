@@ -50,7 +50,10 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
+# syspons project 
 outputs/
+documents/
 
 # Translations
 *.mo
