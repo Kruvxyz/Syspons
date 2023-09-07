@@ -50,12 +50,11 @@ class Flow1Domain(AbstractFlow):
       self.state = self.config.STATE_CONTINUE
 
     elif command == self.config.COMMAND_SUMMARY:
-      current_agent_state = self.get_current_agent_state()
-      if current_agent_state == "init":
-        self.current_agent = self.agents["summary"]
-      else:
-        self.append_to_file(args.get("summary", ""))
-        self.state = self.config.STATE_CONTINUE
+      self.current_agent = self.agents["questions"]
+
+    elif command == self.config.COMMAND_ANSWER:
+      self.append_to_file(str(args.get("answer", "")))
+      self.state = self.config.STATE_CONTINUE
 
     else:
       print(f"undefined command {command} with content {args}")
