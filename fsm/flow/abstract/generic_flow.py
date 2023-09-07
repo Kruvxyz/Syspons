@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from fsm.functions import ParseResponse
+import os.path as path
 
 class AbstractFlow:
   def __init__(self, config: "Config") -> None:
@@ -100,6 +101,7 @@ class AbstractFlow:
       self.state = self.config.STATE_CONTINUE
 
   def append_to_file(self, text: str) -> None:
-    f = open(self.file_name, "a")
+    file_path = path.join("outputs/", self.config.file_name)
+    f = open(file_path, "a")
     f.write(text + "\n")
     f.close()

@@ -14,7 +14,7 @@ import openai
     help="path to file",
 )
 def main(file):
-    # config.set_filename(file)
+    config.set_filename(file)
     openai.api_key = config.open_ai_key
 
     # agent_domain_question = Agent(ai=openai, system_prompt=gen_system_message(""), commands=[])
