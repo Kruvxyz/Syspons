@@ -53,7 +53,7 @@ class Flow1Domain(AbstractFlow):
       self.current_agent = self.agents["questions"]
 
     elif command == self.config.COMMAND_ANSWER:
-      self.append_to_file(str(args.get("answer", "")))
+      self.append_to_file(str(args))
       self.state = self.config.STATE_CONTINUE
 
     else:

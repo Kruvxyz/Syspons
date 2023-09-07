@@ -46,9 +46,13 @@ class AbstractFlow:
     while self.state == self.config.STATE_RUN:
       raw_answer = self.current_agent.talk(self.input)
       answer = ParseResponse(raw_answer)
-      print(self.agent_dict[self.current_agent] +
-            " : " +
-            self.parse_command(answer)[0])
+      command_name, args = self.parse_command(answer)
+      command = command_name.upper()
+      print(f"------------------{self.agent_dict[self.current_agent]}--------------------")
+      print(f"thoughts: {answer.get('thoughts')}")
+      print(f"command: {command}")
+      print(f"args: {str(args)}")
+      print("--------------------------------------")
       self.execute(answer)
     return None
 
