@@ -11,36 +11,25 @@ import openai
 @click.option(
     "--file",
     type=str,
+    default="file.txt",
     help="path to file",
 )
-def main(file):
+@click.option(
+    "--output",
+    type=str,
+    default="output.txt",
+    help="name of output file",
+)
+def main(file, output):
     config.set_filename(file)
+    config.set_output_filename(output)
     openai.api_key = config.open_ai_key
 
-    # agent_domain_question = Agent(ai=openai, system_prompt=gen_system_message(""), commands=[])
-    # def gen_talk(agent):
-    #     def talk(content):
-    #         self=agent
-    #         return """
-    #             {
-    #             "command": {
-    #                 "name": "STORE_AND_END_FLOW",
-    #                 "args": {
-    #                 "summary": "{""" + content + """}"
-    #                 }
-    #             }
-    #         }
-    #         """
-    #     return talk
-    # agent_domain_summary = Agent(ai=openai, system_prompt="", commands=[])
-    # agent_domain_summary.talk = gen_talk(agent_domain_summary)
-
-
-    raw_document = None #fixme: consume document
+    raw_document = None #fixme: consume document from file
 
     agent_domain_exists = gen_agent_domain_exists(openai)
     agent_domain_question = gen_agent_question(openai)
-    flow1_domain_name = Flow1Domain(config, agents = {"init": agent_domain_exists, "questions": agent_domain_question}, file_name=file)
+    flow1_domain_name = Flow1Domain(config, agents = {"init": agent_domain_exists, "questions": agent_domain_question})
 
     # Make experiments on tested domain
     chunk_of_text = """

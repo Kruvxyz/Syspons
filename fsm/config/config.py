@@ -11,6 +11,7 @@ class Config:
         self.open_ai_key = os.getenv("API_KEY", "")
         self.max_tokens = 8192 #gpt-4: https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/chatgpt?pivots=programming-language-chat-completions
         self.file_name = "temporary.txt" # should be overwrite
+        self.output_file_name = "output.txt" # should be overwrite
         
         # States
         self.STATE_RUN = 'RUN'
@@ -25,7 +26,11 @@ class Config:
         self.COMMAND_STORE_AND_END_FLOW = "STORE_AND_END_FLOW"
         self.COMMAND_ANSWER = "ANSWER"
     
-    def set_filename(self, file_name):
+    def set_filename(self, file_name) -> None:
         self.file_name = file_name
-        
+
+    def set_output_filename(self, file_name) -> None:
+        self.output_file_name = file_name
+    
+
 config = Config()

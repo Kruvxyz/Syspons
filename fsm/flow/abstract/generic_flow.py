@@ -101,7 +101,7 @@ class AbstractFlow:
       self.state = self.config.STATE_CONTINUE
 
   def append_to_file(self, text: str) -> None:
-    file_path = path.join("outputs/", self.config.file_name)
+    file_path = path.join("outputs/", self.config.output_file_name)
     f = open(file_path, "a")
     f.write(text + "\n")
     f.close()

@@ -4,18 +4,12 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 class Flow1Domain(AbstractFlow):
   def __init__(self,
                config: "Config",
-               agents: Dict[str, "Agent"],
-               file_name: Optional[str] = None
+               agents: Dict[str, "Agent"]
     ) -> None:
     super().__init__(config)
     self.agents = agents
     self.current_agent = self.agents.get("init", None)
     assert type(self.current_agent) != type(None), "Failed to load initial agent"
-
-    if file_name:
-      self.file_name = file_name
-    else:
-      self.file_name = "output.txt"
 
     self.input = ""
     self.mem = ""
