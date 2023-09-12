@@ -14,6 +14,7 @@ model_to_tokens = {
     "davinci-002": 16384
 }
 
+
 def get_tokens_for_model(model: str) -> int:
     tokens = 0
     for m in model_to_tokens:
@@ -21,19 +22,20 @@ def get_tokens_for_model(model: str) -> int:
             tokens = model_to_tokens[m]
     return tokens
 
+
 class Config:
     """
     Configuration class to store consts.
     """
-    
+
     def __init__(self) -> None:
         """Initialize the Config class"""
         self.open_ai_key = os.getenv("API_KEY", "")
         self.model = os.getenv("OPENAI_MODEL", "gpt-4")
         self.max_tokens = get_tokens_for_model(self.model)
-        self.file_name = "temporary.txt" # should be overwrite
-        self.output_file_name = "output.txt" # should be overwrite
-        
+        self.file_name = "temporary.txt"  # should be overwrite
+        self.output_file_name = "output.txt"  # should be overwrite
+
         # States
         self.STATE_RUN = 'RUN'
         self.STATE_CONTINUE = 'CONTINUE'
@@ -46,12 +48,12 @@ class Config:
         self.COMMAND_SUMMARY = "SUMMARY"
         self.COMMAND_STORE_AND_END_FLOW = "STORE_AND_END_FLOW"
         self.COMMAND_ANSWER = "ANSWER"
-    
+
     def set_filename(self, file_name) -> None:
         self.file_name = file_name
 
     def set_output_filename(self, file_name) -> None:
         self.output_file_name = file_name
-    
+
 
 config = Config()
