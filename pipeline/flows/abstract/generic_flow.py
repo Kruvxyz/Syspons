@@ -33,7 +33,7 @@ class AbstractFlow:
   #   """
   #   return 0
   
-  def run(self, content: str) -> Optional[str]:
+  def run(self, content: str = "") -> Optional[str]:
     """Execute FSM
 
     Args:

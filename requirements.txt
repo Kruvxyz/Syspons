@@ -1,3 +1,7 @@
 openai
 tiktoken
 click
+
+# internet support
+bs4
+selenium

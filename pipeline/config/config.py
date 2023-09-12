@@ -46,6 +46,7 @@ class Config:
         self.COMMAND_END_FLOW = "END_OF_FLOW"
         self.COMMAND_FLAG = "FLAG"
         self.COMMAND_SUMMARY = "SUMMARY"
+        self.COMMAND_STORE = "STORE"
         self.COMMAND_STORE_AND_END_FLOW = "STORE_AND_END_FLOW"
         self.COMMAND_ANSWER = "ANSWER"
 
