@@ -23,7 +23,7 @@ A wrapper which wrapper AI with the following functionallity:
 4. Returns answer in Json format
 
 
-### **Flow**
+### **Pipeline/Flow**
 An FSM [Finite State Machine] which describe the process of calling agents and based on agents' response.
 #### **State**
 A state in flow is built from 2 parts: (1) Agent interface and (2) Command execution.

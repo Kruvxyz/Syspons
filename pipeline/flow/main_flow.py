@@ -1,4 +1,4 @@
-from fsm.flow.abstract.generic_flow import AbstractFlow
+from pipeline.flow.abstract.generic_flow import AbstractFlow
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 class Flow1Domain(AbstractFlow):

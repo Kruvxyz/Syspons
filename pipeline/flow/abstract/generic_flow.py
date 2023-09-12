@@ -1,5 +1,5 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from fsm.functions import ParseResponse
+from pipeline.functions import ParseResponse
 import os.path as path
 
 class AbstractFlow:

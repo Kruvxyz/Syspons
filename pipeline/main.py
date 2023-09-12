@@ -1,9 +1,9 @@
 """Syspons FSM : a system to summary and answear documents"""
-from fsm.config.config import config
-from fsm.flow.main_flow import Flow1Domain
-from fsm.functions import count_tokens
-from fsm.agent.agent import Agent
-from fsm.agent.resources import gen_system_message
+from pipeline.config.config import config
+from pipeline.flow.main_flow import Flow1Domain
+from pipeline.functions import count_tokens
+from pipeline.agent.agent import Agent
+from pipeline.agent.resources import gen_system_message
 import click
 import os.path as path
 import openai

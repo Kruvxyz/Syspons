@@ -25,7 +25,7 @@ class Config:
     """
     Configuration class to store consts.
     """
-
+    
     def __init__(self) -> None:
         """Initialize the Config class"""
         self.open_ai_key = os.getenv("API_KEY", "")

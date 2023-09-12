@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from fsm.functions import count_tokens
-from fsm.config import config
+from pipeline.functions import count_tokens
+from pipeline.config.config import config
 
 class Agent:
   def __init__(self,
