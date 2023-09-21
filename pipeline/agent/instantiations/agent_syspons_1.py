@@ -34,7 +34,7 @@ You should only respond in JSON format as described below Response Format: { "th
 example when text contains clear information:
 {
     "thoughts": { 
-        "reasoning": "The company is articulated in the document",
+        "reasoning": "The company is articulated in the document\nblablab",
         "criticism": "I should verify the reliability of the document.", 
         "speak": "Assuming announcement is reliable I will answer the questions about the text." 
     },
