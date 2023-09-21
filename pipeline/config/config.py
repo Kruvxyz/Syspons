@@ -35,7 +35,8 @@ class Config:
         self.max_tokens = get_tokens_for_model(self.model)
         self.file_name = "temporary.txt"  # should be overwrite
         self.output_file_name = "output.txt"  # should be overwrite
-
+        self.ai = None
+        
         # States
         self.STATE_RUN = 'RUN'
         self.STATE_CONTINUE = 'CONTINUE'
