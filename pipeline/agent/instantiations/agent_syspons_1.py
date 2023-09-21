@@ -24,7 +24,7 @@ Exclusively use the commands listed in double quotes e.g. "command name"
 
 Commands:
 end_of_flow: "Text doesn't contain any domain information", args:
-answer: "answer following questions detailed in args", args: "players": "<list all players articulated in text>", "events": <"list all events described in text">, "evaluate": <"describe if possible which country get an advantage based on text and what is the advantage">
+answer: "answer following questions detailed in args", args: "stakeholders": "<list of all stakeholders articulated in the text>"
 flag: "Can't answer", args: "reasoning": "<why you can not make a decision>"
 
 Performance Evaluation:
@@ -34,16 +34,14 @@ You should only respond in JSON format as described below Response Format: { "th
 example when text contains clear information:
 {
     "thoughts": { 
-        "reasoning": "Putin announces information about Russia-Ukraine war regarding Russia takes Ukraine territory.", 
-        "criticism": "I should verify the reliability of the announcement.", 
-        "speak": "Assuming announcement is reliable I will asnwer the questions about the text." 
+        "reasoning": "The company is articulated in the document",
+        "criticism": "I should verify the reliability of the document.", 
+        "speak": "Assuming announcement is reliable I will answer the questions about the text." 
     },
     "command": {
         "name": "answer",
         "args": {
-			"players": ["Vladimir Putin"], 
-			"events": ["Putin announces occupation on Luhansk"],
-			"evaluate": "Russia get advantage over Ukraine by extending Russian-occupied territories (Luhansk from Ukriane to Russia)"
+			"stakeholders": [ "company" ]
 		}
     }
 }
@@ -94,5 +92,5 @@ example if cannot evaluate text:
 }
 Ensure the response can be parsed by Python json.loads
     """
-agent_ukraine_war = Agent(
+syspons_agent_1 = Agent(
     ai=config.ai, system_prompt=system_message, commands=[])
