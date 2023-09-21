@@ -62,7 +62,7 @@ docuemnt tokens: {count_tokens(chunk)}
 buffer: {BUFFER}
 LLM max tokens: {config.max_tokens}
         """)
-        if syspons_agent_1.get_expected_converation_tokens() + count_tokens(raw_document) < config.max_tokens + BUFFER:
+        if syspons_agent_1.get_expected_converation_tokens() + count_tokens(chunks) < config.max_tokens + BUFFER:
             one_step_flow.run(chunk)
         else:
             print(f"failed for chunk {str(index)}")
