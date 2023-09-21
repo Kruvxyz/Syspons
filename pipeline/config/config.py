@@ -30,8 +30,8 @@ class Config:
 
     def __init__(self) -> None:
         """Initialize the Config class"""
-        self.open_ai_key = os.getenv("API_KEY", "")
-        self.model = os.getenv("OPENAI_MODEL", "gpt-4")
+        self.open_ai_key = ""
+        self.model = "gpt-4"
         self.max_tokens = get_tokens_for_model(self.model)
         self.file_name = "temporary.txt"  # should be overwrite
         self.output_file_name = "output.txt"  # should be overwrite

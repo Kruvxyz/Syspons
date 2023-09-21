@@ -5,8 +5,16 @@ from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
 import click
+import os
 import os.path as path
 import openai
+from dotenv import load_dotenv
+
+
+load_dotenv()
+config.open_ai_key = os.getenv("API_KEY", "")
+config.model =  os.getenv("OPENAI_MODEL", "gpt-4")
+
 
 @click.command()
 @click.option(
