@@ -1,6 +1,7 @@
 """Syspons FSM : a system to summary and answear documents"""
 from pipeline.config.config import config
 from pipeline.flows.main_flow import Flow1Domain
+from pipeline.flows.simple_flow import OneStepFlow
 from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
@@ -29,7 +30,7 @@ config.model =  os.getenv("OPENAI_MODEL", "gpt-4")
     default="output.txt",
     help="name of output file",
 )
-def main(file, output):
+def main(file: str, output: str) -> None:
     config.set_filename(file)
     config.set_output_filename(output)
     openai.api_key = config.open_ai_key
@@ -43,8 +44,11 @@ def main(file, output):
     # agent_domain_question = gen_agent_question(openai)
     from pipeline.agent.instantiations.agent_ukraine_war_in_text import agent_ukraine_war_in_text
     from pipeline.agent.instantiations.agent_ukraine_war_questions import agent_ukraine_war_questions
+    from pipeline.agent.instantiations.agent_ukraine_war_simple_flow import agent_ukraine_war
 
-    flow1_domain_name = Flow1Domain(config, agents = {"init": agent_ukraine_war_in_text, "questions": agent_ukraine_war_questions})
+    # flow1_domain_name = Flow1Domain(config, agents = {"init": agent_ukraine_war_in_text, "questions": agent_ukraine_war_questions})
+    one_step_flow = OneStepFlow(config, agents = {"init": agent_ukraine_war})
+    flow1_domain_name = Flow1Domain(config, agents = {"init": agent_ukraine_war})
     
     print(f""" 
 agent max tokens: {max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens())}
@@ -53,7 +57,8 @@ buffer: {BUFFER}
 LLM max tokens: {config.max_tokens}
     """)
     if max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens()) + count_tokens(raw_document) < config.max_tokens + BUFFER:
-        flow1_domain_name.run(raw_document)
+        # flow1_domain_name.run(raw_document)
+        one_step_flow.run(raw_document)
 
 
 # def gen_agent_domain_exists(ai):
