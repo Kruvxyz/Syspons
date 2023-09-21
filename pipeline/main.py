@@ -51,15 +51,31 @@ def main(file: str, output: str) -> None:
     one_step_flow = OneStepFlow(config, agents={"init": syspons_agent_1})
     flow1_domain_name = Flow1Domain(config, agents={"init": agent_ukraine_war})
 
-    print(f""" 
-agent max tokens: {max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens())}
-docuemnt tokens: {count_tokens(raw_document)}
+    chunk_size = 16000
+    # fixme(guyhod): should be done based on tokens
+    chunks = [raw_document[i:i+chunk_size]
+              for i in range(0, len(raw_document), chunk_size)]
+    for index, chunk in enumerate(chunks):
+        print(f""" 
+agent max tokens: {agent_ukraine_war.get_expected_converation_tokens()}
+docuemnt tokens: {count_tokens(chunk)}
 buffer: {BUFFER}
 LLM max tokens: {config.max_tokens}
-    """)
-    if max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens()) + count_tokens(raw_document) < config.max_tokens + BUFFER:
-        # flow1_domain_name.run(raw_document)
-        one_step_flow.run(raw_document)
+        """)
+        if max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens()) + count_tokens(raw_document) < config.max_tokens + BUFFER:
+            one_step_flow.run(chunk)
+        else:
+            print(f"failed for chunk {str(index)}")
+
+
+#     print(f"""
+# agent max tokens: {max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens())}
+# docuemnt tokens: {count_tokens(raw_document)}
+# buffer: {BUFFER}
+# LLM max tokens: {config.max_tokens}
+#     """)
+#     if max(agent_ukraine_war_in_text.get_expected_converation_tokens(), agent_ukraine_war_questions.get_expected_converation_tokens()) + count_tokens(raw_document) < config.max_tokens + BUFFER:
+#         flow1_domain_name.run(raw_document)
 
 
 # def gen_agent_domain_exists(ai):
