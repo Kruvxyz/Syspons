@@ -15,6 +15,7 @@ class Agent:
     self.system_prompt = system_prompt
     self.prompt_generator = prompt_generator
     self.answer_max_tokens = answer_max_tokens
+    self.history = []
 
   def get_expected_converation_tokens(self) -> int:
     #fixme(guyhod): for this project we don't have memory, when memory will be added it should be part of calculation
@@ -45,6 +46,9 @@ class Agent:
       )
     return resp["choices"][0]["message"]["content"]
 
+  def push_message(self, message: Dict[str, str]) -> None:
+      self.history.append(message)
+      
   def train(self, *args, **kwargs) -> None:
       # TODO(guyhod): future / empty interface for now
       pass
