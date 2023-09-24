@@ -48,7 +48,10 @@ class Agent:
 
   def push_message(self, message: Dict[str, str]) -> None:
       self.history.append(message)
-      
+
+  def reset(self):
+      self.history = []
+
   def train(self, *args, **kwargs) -> None:
       # TODO(guyhod): future / empty interface for now
       pass
