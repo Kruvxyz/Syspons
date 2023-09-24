@@ -44,3 +44,7 @@ class Agent:
           ]
       )
     return resp["choices"][0]["message"]["content"]
+
+  def train(self, *args, **kwargs) -> None:
+      # TODO(guyhod): future / empty interface for now
+      pass
