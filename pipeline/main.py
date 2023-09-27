@@ -5,10 +5,13 @@ from pipeline.flows.simple_flow import OneStepFlow
 from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
+from pipeline.functions.ParseWord import headers, parse_docx
 import click
 import os
 import os.path as path
 import openai
+import zipfile
+import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
 
 
@@ -25,20 +28,42 @@ config.model = os.getenv("OPENAI_MODEL", "gpt-4")
     help="path to file",
 )
 @click.option(
+    "--file_type",
+    type=str,
+    default="txt",
+    help="type of file parsing",
+)
+@click.option(
     "--output",
     type=str,
     default="output.txt",
     help="name of output file",
 )
-def main(file: str, output: str) -> None:
+def main(file: str, output: str, file_type: str) -> None:
     config.set_filename(file)
     config.set_output_filename(output)
     openai.api_key = config.open_ai_key
     config.ai = openai
 
     BUFFER = 0
-    f = open(path.join("documents/", file), "r")
-    raw_document = f.read()
+    doc_path = path.join("documents/", file)
+    # fixme(guyhod): should be done based on tokens
+    if file_type == 'txt':
+        doc = open(doc_path, "r")
+        raw_document = doc.read()
+        chunk_size = 10000
+        chunks = [raw_document[i:i+chunk_size]
+            for i in range(0, len(raw_document), chunk_size)]
+        
+    elif file_type == 'word':
+        json_doc = parse_docx(doc_path)
+        chunks = []
+        for i in range(len(json_doc)):
+            chunks.append(f"Header: {json_doc[i][headers.HEADER]}\n Content: {json_doc[i][headers.TEXT]}")
+            for j in range(len(json_doc[i][headers.CONTENT])):
+                chunks.append(f"Header: {json_doc[i][headers.HEADER]}\Title: {json_doc[i][headers.CONTENT][j][headers.HEADER]}\n Content: {json_doc[i][headers.CONTENT][j][headers.TEXT]}")
+                for k in range(len(json_doc[i][headers.CONTENT][j][headers.CONTENT])):
+                    chunks.append(f"Header: {json_doc[i][headers.HEADER]}\Title: {json_doc[i][headers.CONTENT][j][headers.HEADER]}\nSubtitle: {json_doc[i][headers.CONTENT][j][headers.CONTENT][k][headers.HEADER]}\n Content: {json_doc[i][headers.CONTENT][j][headers.CONTENT][k][headers.TEXT]}")
 
     # agent_domain_exists = gen_agent_domain_exists(openai)
     # agent_domain_question = gen_agent_question(openai)
@@ -51,10 +76,8 @@ def main(file: str, output: str) -> None:
     one_step_flow = OneStepFlow(config, agents={"init": syspons_agent_1})
     flow1_domain_name = Flow1Domain(config, agents={"init": agent_ukraine_war})
 
-    chunk_size = 10000
-    # fixme(guyhod): should be done based on tokens
-    chunks = [raw_document[i:i+chunk_size]
-              for i in range(0, len(raw_document), chunk_size)]
+
+
     for index, chunk in enumerate(chunks):
         print(f""" 
 agent max tokens: {syspons_agent_1.get_expected_converation_tokens()}
