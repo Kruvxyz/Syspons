@@ -5,7 +5,7 @@ from pipeline.flows.simple_flow import OneStepFlow
 from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
-from pipeline.functions.ParseWord import headers, parse_docx
+from pipeline.functions.ParseWord import headers, parse_docx, chunk_dict
 import click
 import os
 import os.path as path
@@ -57,13 +57,7 @@ def main(file: str, output: str, file_type: str) -> None:
         
     elif file_type == 'word':
         json_doc = parse_docx(doc_path)
-        chunks = []
-        for i in range(len(json_doc)):
-            chunks.append(f"Header: {json_doc[i][headers.HEADER]}\n Content: {json_doc[i][headers.TEXT]}")
-            for j in range(len(json_doc[i][headers.CONTENT])):
-                chunks.append(f"Header: {json_doc[i][headers.HEADER]}\Title: {json_doc[i][headers.CONTENT][j][headers.HEADER]}\n Content: {json_doc[i][headers.CONTENT][j][headers.TEXT]}")
-                for k in range(len(json_doc[i][headers.CONTENT][j][headers.CONTENT])):
-                    chunks.append(f"Header: {json_doc[i][headers.HEADER]}\Title: {json_doc[i][headers.CONTENT][j][headers.HEADER]}\nSubtitle: {json_doc[i][headers.CONTENT][j][headers.CONTENT][k][headers.HEADER]}\n Content: {json_doc[i][headers.CONTENT][j][headers.CONTENT][k][headers.TEXT]}")
+        chunks = chunk_dict(json_doc)
 
     # agent_domain_exists = gen_agent_domain_exists(openai)
     # agent_domain_question = gen_agent_question(openai)
@@ -85,6 +79,7 @@ docuemnt tokens: {count_tokens(chunk)}
 buffer: {BUFFER}
 LLM max tokens: {config.max_tokens}
         """)
+        print(chunk)
         if syspons_agent_1.get_expected_converation_tokens() + count_tokens(chunk) < config.max_tokens + BUFFER:
             one_step_flow.run(chunk)
         else:

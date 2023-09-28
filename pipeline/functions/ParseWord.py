@@ -1,3 +1,4 @@
+from io import TextIOWrapper
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import os.path as path
@@ -9,9 +10,11 @@ class DocHeaders:
     def __init__(self):
         self.H1 = "H1"
         self.H2 = "H2"
+        self.H3 = "H3"
         self.H4 = "H4"
 
         self.TEXT = "TEXT"
+        self.HEADER_TYPE = "TYPE"
         self.HEADER = "HEADER"
         self.CONTENT = "CONTENT"
 
@@ -41,16 +44,18 @@ def get_section_type(p):
     heading_style_elem = p.find(".//w:pStyle[@w:val='G-Ch4-Subheading']", ns)
     if heading_style_elem is not None:
         return_val = headers.H4
+    #fixme(guyhod): add H3
     ""
 
     return return_val
 
 
-def create_doc_object(header: str):
-    return {headers.TEXT: "", headers.HEADER: header, headers.CONTENT: []}
+def create_doc_object(header: str, header_type: str):
+    return {headers.TEXT: "", headers.HEADER_TYPE: header_type
+            , headers.HEADER: header, headers.CONTENT: []}
 
 
-def parse_docx(doc_path) -> Dict[str, Any]:
+def parse_docx(doc_path: TextIOWrapper) -> Dict[str, Any]:
     doc = zipfile.ZipFile(doc_path).read('word/document.xml')
     root = ET.fromstring(doc)
     # Microsoft's XML makes heavy use of XML namespaces; thus, we'll need to reference that in our code
@@ -63,26 +68,26 @@ def parse_docx(doc_path) -> Dict[str, Any]:
     current_h1 = 0
     current_h2 = None
     current_h4 = None
-    sections_parsed = [create_doc_object("Untitled")]
+    sections_parsed = [create_doc_object("Untitled", headers.H1)]
 
     for s in p_sections:
         section_text = get_section_text(s)
         section_type = get_section_type(s)
         if section_type == headers.H1:
-            sections_parsed.append(create_doc_object(section_text))
+            sections_parsed.append(create_doc_object(section_text, headers.H1))
             current_h1 = len(sections_parsed) - 1
             current_h2 = None
             current_h4 = None
 
         elif section_type == headers.H2:
             sections_parsed[current_h1][headers.CONTENT].append(
-                create_doc_object(section_text))
+                create_doc_object(section_text, headers.H2))
             current_h2 = len(sections_parsed[current_h1][headers.CONTENT]) - 1
             current_h4 = None
 
         elif section_type == headers.H4:
             sections_parsed[current_h1][headers.CONTENT][current_h2][headers.CONTENT].append(
-                create_doc_object(section_text))
+                create_doc_object(section_text, headers.H4))
             current_h4 = len(
                 sections_parsed[current_h1][headers.CONTENT][current_h2][headers.CONTENT]) - 1
 
@@ -97,3 +102,30 @@ def parse_docx(doc_path) -> Dict[str, Any]:
                 sections_parsed[current_h1][headers.CONTENT][current_h2][headers.CONTENT][current_h4][headers.TEXT] += section_text
 
     return sections_parsed
+
+def translate_header_to_string(header_type:str) -> Optional[str]:
+    if header_type == headers.H1:
+        return "Header"
+    elif header_type == headers.H2:
+        return "Title"
+    elif header_type == headers.H3:
+        return "Subtitle"
+    elif header_type == headers.H4:
+        return "Subtitle"
+    else: 
+        return None
+    
+def chunk_dict(dict_doc:Dict[str, Any], init_string:str="") -> List[str]:
+    chunks = []
+
+    for i in range(len(dict_doc)):
+        header_string = init_string
+        header_type = translate_header_to_string(dict_doc[i][headers.HEADER_TYPE])
+        if header_type is not None:
+            header_string += f"{header_type}: {dict_doc[i][headers.HEADER]}\n"
+        chunks.append(f"{header_string}Text: {dict_doc[i][headers.TEXT]}")
+        if dict_doc[i][headers.CONTENT]:
+            child_chunks = chunk_dict(dict_doc[i][headers.CONTENT], init_string=header_string)
+            chunks += child_chunks
+        
+    return chunks
