@@ -1,6 +1,7 @@
 import unittest
 
-from tests.unit.Agent.TestAgentInterface import TestAgentInterface
+from tests.unit.agent.TestAgentInterface import TestAgentInterface
+from tests.unit.functions.TestParseWord import TestParseWord
 
 if __name__ == '__main__':
     unittest.main()
