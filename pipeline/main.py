@@ -107,7 +107,7 @@ def main(file: str, folder: str, output: str, file_type: str) -> None:
             """)
             print(data)
             if syspons_agent_1.get_expected_converation_tokens() + count_tokens(data) < config.max_tokens + BUFFER:
-                one_step_flow.data["filename"] = file
+                one_step_flow.data["filename"] = doc_path
                 one_step_flow.data["headers"] = header
                 one_step_flow.run(data)
 
