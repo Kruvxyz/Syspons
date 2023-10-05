@@ -33,7 +33,7 @@ class Config:
         self.open_ai_key = ""
         self.model = "gpt-4"
         self.max_tokens = get_tokens_for_model(self.model)
-        self.file_name = "temporary.txt"  # should be overwrite
+        self.file_names = ["temporary.txt"]  # should be overwrite
         self.output_file_name = "output.txt"  # should be overwrite
         self.ai = None
         
@@ -51,8 +51,8 @@ class Config:
         self.COMMAND_STORE_AND_END_FLOW = "STORE_AND_END_FLOW"
         self.COMMAND_ANSWER = "ANSWER"
 
-    def set_filename(self, file_name) -> None:
-        self.file_name = file_name
+    def set_filenames(self, file_names: List[str]) -> None:
+        self.file_names = file_names
 
     def set_output_filename(self, file_name) -> None:
         self.output_file_name = file_name

@@ -6,6 +6,7 @@ from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
 from pipeline.functions.ParseWord import headers, parse_docx, chunk_dict, chunk_dict_with_headers
+from pipeline.functions.FilesInFolder import get_files
 import click
 import os
 import os.path as path
@@ -13,6 +14,8 @@ import openai
 import zipfile
 import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
+from PyPDF2 import PdfReader 
+
 
 
 load_dotenv()
@@ -24,8 +27,14 @@ config.model = os.getenv("OPENAI_MODEL", "gpt-4")
 @click.option(
     "--file",
     type=str,
-    default="file.txt",
+    default="",
     help="path to file",
+)
+@click.option(
+    "--folder",
+    type=str,
+    default="",
+    help="path to files' folder",
 )
 @click.option(
     "--file_type",
@@ -39,60 +48,71 @@ config.model = os.getenv("OPENAI_MODEL", "gpt-4")
     default="output.txt",
     help="name of output file",
 )
-def main(file: str, output: str, file_type: str) -> None:
-    config.set_filename(file)
+def main(file: str, folder: str, output: str, file_type: str) -> None:
+    if len(file)==0:
+        files = get_files(folder, filter=file_type)
+        config.set_filenames(files)
+    else:
+        doc_path = path.join("documents/", file)
+        config.set_filenames([doc_path])
     config.set_output_filename(output)
     openai.api_key = config.open_ai_key
     config.ai = openai
-
-    BUFFER = 0
-    doc_path = path.join("documents/", file)
-    # fixme(guyhod): should be done based on tokens
-    if file_type == 'txt':
-        doc = open(doc_path, "r")
-        raw_document = doc.read()
-        chunk_size = 10000
-        chunks = [raw_document[i:i+chunk_size]
-            for i in range(0, len(raw_document), chunk_size)]
-        
-    elif file_type == 'word':
-        json_doc = parse_docx(doc_path)
-        # chunks = chunk_dict(json_doc)
-        chunks = chunk_dict_with_headers(json_doc)
-        print(chunks[2])
-        
-
-    # agent_domain_exists = gen_agent_domain_exists(openai)
-    # agent_domain_question = gen_agent_question(openai)
-    from pipeline.agent.instantiations.agent_ukraine_war_in_text import agent_ukraine_war_in_text
-    from pipeline.agent.instantiations.agent_ukraine_war_questions import agent_ukraine_war_questions
-    from pipeline.agent.instantiations.agent_ukraine_war_simple_flow import agent_ukraine_war
+    
     from pipeline.agent.instantiations.agent_syspons_1 import syspons_agent_1
 
-    # flow1_domain_name = Flow1Domain(config, agents = {"init": agent_ukraine_war_in_text, "questions": agent_ukraine_war_questions})
-    one_step_flow = OneStepFlow(config, agents={"init": syspons_agent_1})
-    flow1_domain_name = Flow1Domain(config, agents={"init": agent_ukraine_war})
+    BUFFER = 0
+    
+    for doc_path in config.file_names:
+    # fixme(guyhod): should be done based on tokens
+        if file_type == 'txt':
+            doc = open(doc_path, "r")
+            raw_document = doc.read()
+            chunk_size = 10000
+            chunks = [{"header": "None", "data": raw_document[i:i+chunk_size]}
+                for i in range(0, len(raw_document), chunk_size)]
+            
+        elif file_type == 'word':
+            json_doc = parse_docx(doc_path)
+            # chunks = chunk_dict(json_doc)
+            chunks = chunk_dict_with_headers(json_doc)
+
+        elif file_type == 'pdf':
+            reader = PdfReader(doc_path) 
+            pages_docuemnt = [page.extract_text() for page in reader.pages]
+            raw_document = ' '.join(pages_docuemnt)
+            chunk_size = 10000
+            chunks = [{"header": "None", "data": raw_document[i:i+chunk_size]}
+                for i in range(0, len(raw_document), chunk_size)]            
+
+        # agent_domain_exists = gen_agent_domain_exists(openai)
+        # agent_domain_question = gen_agent_question(openai)
+
+
+        # flow1_domain_name = Flow1Domain(config, agents = {"init": agent_ukraine_war_in_text, "questions": agent_ukraine_war_questions})
+        one_step_flow = OneStepFlow(config, agents={"init": syspons_agent_1})
+        # flow1_domain_name = Flow1Domain(config, agents={"init": agent_ukraine_war})
 
 
 
-    for index, chunk in enumerate(chunks):
-        print(index)
-        header = str(chunk["header"])
-        data = chunk["data"]
-        print(f""" 
-agent max tokens: {syspons_agent_1.get_expected_converation_tokens()}
-docuemnt tokens: {count_tokens(data)}
-buffer: {BUFFER}
-LLM max tokens: {config.max_tokens}
-        """)
-        print(data)
-        if syspons_agent_1.get_expected_converation_tokens() + count_tokens(data) < config.max_tokens + BUFFER:
-            one_step_flow.data["filename"] = file
-            one_step_flow.data["headers"] = header
-            one_step_flow.run(data)
+        for index, chunk in enumerate(chunks):
+            print(index)
+            header = str(chunk["header"])
+            data = chunk["data"]
+            print(f""" 
+    agent max tokens: {syspons_agent_1.get_expected_converation_tokens()}
+    docuemnt tokens: {count_tokens(data)}
+    buffer: {BUFFER}
+    LLM max tokens: {config.max_tokens}
+            """)
+            print(data)
+            if syspons_agent_1.get_expected_converation_tokens() + count_tokens(data) < config.max_tokens + BUFFER:
+                one_step_flow.data["filename"] = file
+                one_step_flow.data["headers"] = header
+                one_step_flow.run(data)
 
-        else:
-            print(f"failed for chunk {str(index)} with header {str(header)}")
+            else:
+                print(f"failed for chunk {str(index)} with header {str(header)}")
 
 
 #     print(f"""

@@ -2,6 +2,7 @@ dotenv
 openai
 tiktoken
 click
+PyPDF2 
 
 # internet support
 bs4
