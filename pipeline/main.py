@@ -1,11 +1,11 @@
 """Syspons FSM : a system to summary and answear documents"""
 from pipeline.config.config import config
 from pipeline.flows.main_flow import Flow1Domain
-from pipeline.flows.simple_flow import OneStepFlow
+from pipeline.flows.simple_flow_2 import OneStepFlow
 from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
-from pipeline.functions.ParseWord import headers, parse_docx, chunk_dict
+from pipeline.functions.ParseWord import headers, parse_docx, chunk_dict, chunk_dict_with_headers
 import click
 import os
 import os.path as path
@@ -57,7 +57,10 @@ def main(file: str, output: str, file_type: str) -> None:
         
     elif file_type == 'word':
         json_doc = parse_docx(doc_path)
-        chunks = chunk_dict(json_doc)
+        # chunks = chunk_dict(json_doc)
+        chunks = chunk_dict_with_headers(json_doc)
+        print(chunks[2])
+        
 
     # agent_domain_exists = gen_agent_domain_exists(openai)
     # agent_domain_question = gen_agent_question(openai)
@@ -73,17 +76,23 @@ def main(file: str, output: str, file_type: str) -> None:
 
 
     for index, chunk in enumerate(chunks):
+        print(index)
+        header = str(chunk["header"])
+        data = chunk["data"]
         print(f""" 
 agent max tokens: {syspons_agent_1.get_expected_converation_tokens()}
-docuemnt tokens: {count_tokens(chunk)}
+docuemnt tokens: {count_tokens(data)}
 buffer: {BUFFER}
 LLM max tokens: {config.max_tokens}
         """)
-        print(chunk)
-        if syspons_agent_1.get_expected_converation_tokens() + count_tokens(chunk) < config.max_tokens + BUFFER:
-            one_step_flow.run(chunk)
+        print(data)
+        if syspons_agent_1.get_expected_converation_tokens() + count_tokens(data) < config.max_tokens + BUFFER:
+            one_step_flow.data["filename"] = file
+            one_step_flow.data["headers"] = header
+            one_step_flow.run(data)
+
         else:
-            print(f"failed for chunk {str(index)}")
+            print(f"failed for chunk {str(index)} with header {str(header)}")
 
 
 #     print(f"""

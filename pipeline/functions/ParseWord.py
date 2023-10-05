@@ -129,3 +129,18 @@ def chunk_dict(dict_doc:Dict[str, Any], init_string:str="") -> List[str]:
             chunks += child_chunks
         
     return chunks
+
+def chunk_dict_with_headers(dict_doc:Dict[str, Any], init_string:str="") -> List[Dict[str, str]]:
+    chunks = []
+
+    for i in range(len(dict_doc)):
+        header_string = init_string
+        header_type = translate_header_to_string(dict_doc[i][headers.HEADER_TYPE])
+        if header_type is not None:
+            header_string += f"{header_type}: {dict_doc[i][headers.HEADER]}\n"
+        chunks.append({"header":header_string, "data":f"{header_string}Text: {dict_doc[i][headers.TEXT]}"})
+        if dict_doc[i][headers.CONTENT]:
+            child_chunks = chunk_dict_with_headers(dict_doc[i][headers.CONTENT], init_string=header_string)
+            chunks += child_chunks
+        
+    return chunks

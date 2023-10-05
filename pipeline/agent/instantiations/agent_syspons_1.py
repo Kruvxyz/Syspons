@@ -24,7 +24,7 @@ Exclusively use the commands listed in double quotes e.g. "command name"
 
 Commands:
 end_of_flow: "Text doesn't contain any domain information", args:
-answer: "Extract the score for the four assessment dimensions of relevance", args: "Score": "<A score of the assessment dimension>"
+answer: "Extract the score for the four assessment dimensions of relevance", args: "Score": "<A score of the assessment dimension>", "Criteria": "<The criteria the score relate to>"
 flag: "Can't answer", args: "reasoning": "<why you can not make a decision>"
 
 Performance Evaluation:
