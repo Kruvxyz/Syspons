@@ -1,5 +1,6 @@
 from pipeline.agent.agent import Agent
 from pipeline.config.config import config
+from pipeline.agent.agi.prompt_generator import gen_prompt
 
 system_message = """
 You are a simulator. This means you will get the followings 2 inputs:
@@ -66,5 +67,5 @@ example if cannot evaluate text:
 }
 Ensure the response can be parsed by Python json.loads
     """
-agent_simulation = Agent(ai=config.ai, system_prompt=system_message, commands=[])
+agent_simulation = Agent(ai=config.ai, system_prompt=system_message, commands=[], prompt_generator=gen_prompt)
      

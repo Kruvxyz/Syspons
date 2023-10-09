@@ -1,5 +1,6 @@
 from pipeline.flows.abstract.generic_flow import AbstractFlow
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from pipeline.status import status
 
 
 # Flow:
@@ -28,7 +29,7 @@ class Consciousness(AbstractFlow):
     ) -> None:
     super().__init__(config)
     self.agents = agents
-    self.current_agent = self.agents.get("init", None)
+    self.current_agent = self.agents.get("SIMULATION", None)
     assert type(self.current_agent) != type(None), "Failed to load initial agent"
 
     self.input = ""
@@ -44,12 +45,13 @@ class Consciousness(AbstractFlow):
     """
     self.input = {
       "on_hold": {},
-      "next": self.agents["init"],  # Temporary thing
-      "situation": self.observation.get(),
+      "next": self.agents["THINK"], 
+      "situation": "", #self.observation.get(),
       "content": content
     }
     self.current_agent = self.agents["SIMULATION"]
     self.state = self.config.STATE_RUN
+    status.status = self.config.STATE_RUN
 
   def clear(self) -> None:
     self.agent_dict["THINK"].reset()
@@ -65,6 +67,7 @@ class Consciousness(AbstractFlow):
     Execute command
     """
     current_agent = self.agent_dict[self.current_agent].upper()
+    status.agent = current_agent
     command_name, args = self.parse_command(data)
     command = command_name.upper()
 
@@ -101,7 +104,7 @@ class Consciousness(AbstractFlow):
         self.input["content"] = self.input["on_hold"]
 
       elif command == "SELECT":
-        self.api.execute(self.input["on_hold"], self.mem)
+        # self.api.execute(self.input["on_hold"], self.mem)
         self.agent_dict["THINK"].trian()
         self.pre_execute_loop()
 

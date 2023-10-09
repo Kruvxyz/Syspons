@@ -4,6 +4,11 @@ tiktoken
 click
 PyPDF2 
 
+# rest api
+flask==2.3.2
+flask-cors==3.0.10
+singleton-decorator==1.0.0
+
 # internet support
 bs4
 selenium

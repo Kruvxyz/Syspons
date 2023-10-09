@@ -11,7 +11,7 @@ class AbstractFlow:
     self.file_name: str = "output.txt"
     self.agents: Dict[str, "Agent"] = {}
     self.current_agent: Optional["Agent"] = None
-    self.input: str = "" # input to propagate between states
+    self.input: Any = ""  # input to propagate between states
     self.mem: str = "" # memory
     self.state: str = self.config.STATE_NONE
     self.agent_dict = {}
@@ -45,7 +45,13 @@ class AbstractFlow:
     self.pre_execute_loop(content)
 
     while self.state == self.config.STATE_RUN:
-      raw_answer = self.current_agent.talk(self.input)
+      if type(self.input) is str:
+        raw_answer = self.current_agent.talk(self.input)
+      elif type(self.input) is dict: 
+        raw_answer = self.current_agent.talk("", self.input)
+      else:
+        raise TypeError("flow->input type must be str or dict")
+
       answer = ParseResponse(raw_answer)
       command_name, args = self.parse_command(answer)
       command = command_name.upper()
