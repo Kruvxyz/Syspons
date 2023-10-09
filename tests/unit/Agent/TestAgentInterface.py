@@ -28,9 +28,10 @@ class TestAgentInterface(unittest.TestCase):
     def test_gen_agent_simple(self):
         return_string = "test string"
         ai_interface = AIInterface(return_string)
-        agent = Agent(ai=ai_interface, system_prompt="test" ,commands=[])
+        agent = Agent(ai=ai_interface, system_prompt="test", commands=[])
         answer = agent.talk("input")
         self.assertEqual(answer, return_string)
+
 
 if __name__ == '__main__':
     unittest.main()
