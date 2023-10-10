@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from pipeline.status import status
+from pipeline.shared_content import status
 from app.background_flow import flow
 import threading
 

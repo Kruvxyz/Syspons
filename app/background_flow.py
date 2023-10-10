@@ -1,6 +1,3 @@
-from pipeline.agent.agi.simulation import agent_simulation
-from pipeline.agent.agi.thought import agent_thought
-from pipeline.agent.agi.mind import agent_mind
 import openai
 import os
 
@@ -15,7 +12,9 @@ config.model = os.getenv("OPENAI_MODEL", "gpt-4")
 
 openai.api_key = config.open_ai_key
 config.ai = openai
-
+from pipeline.agent.agi.simulation import agent_simulation
+from pipeline.agent.agi.thought import agent_thought
+from pipeline.agent.agi.mind import agent_mind
 
 flow = Consciousness(config, agents={"MIND": agent_mind, "THINK": agent_thought,
                      "SIMULATION": agent_simulation}, api="OPENAI", observation=None)

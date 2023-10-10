@@ -1,6 +1,6 @@
 from pipeline.flows.abstract.generic_flow import AbstractFlow
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from pipeline.status import status
+from pipeline.shared_content import status
 
 
 # Flow:
@@ -76,7 +76,7 @@ class Consciousness(AbstractFlow):
       if command == "ASK" or command == "SUGGEST":
         self.input["on_hold"] = data
         self.current_agent = self.agents["MIND"]
-        self.input["next"] = self.agent["SIMULATION"]
+        self.input["next"] = self.agents["SIMULATION"]
         self.mem.append({"THINK": data})
         if command == "ASK":
           self.input["content"] = f"You should simulate a response for: {args['question']}"
@@ -92,7 +92,7 @@ class Consciousness(AbstractFlow):
     elif current_agent == "SIMULATION":
       # agent will simulate outcame based on thinking and current state
       self.mem.append({"SIMULATION": data})
-      self.current_agent = self.agent_dict["THINK"]
+      self.current_agent = self.agents["THINK"]
       #fixme(guyhod) - keep going here...
 
     elif current_agent == "MIND":
