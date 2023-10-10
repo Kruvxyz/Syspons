@@ -78,5 +78,5 @@ example if cannot evaluate text:
 }
 Ensure the response can be parsed by Python json.loads
     """
-agent_thought = Agent(ai=config.ai, system_prompt=system_message, commands=[])
+agent_thought = Agent("THOUGHT", ai=config.ai, system_prompt=system_message, commands=[])
      

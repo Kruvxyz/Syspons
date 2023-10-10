@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from pipeline.functions import ParseResponse
+from pipeline.shared_content import logger
 import os.path as path
 
 class AbstractFlow:
@@ -18,6 +19,7 @@ class AbstractFlow:
 
   def set_agent_dict(self) -> None:
     self.agent_dict = {self.agents[name]: name for name in self.agents}
+    logger.info(f"flow: set_agent_dict: {str(self.agent_dict)}")
 
   def get_current_agent_state(self) -> str:
     current_agent_state = self.agent_dict.get(self.current_agent, None)  
@@ -42,9 +44,12 @@ class AbstractFlow:
     Returns:
       TBD
     """
+    logger.info("flow: run")
     self.pre_execute_loop(content)
+    logger.info("flow: run pre_execute_loop complete")
 
     while self.state == self.config.STATE_RUN:
+      logger.info("flow: state: STATE_RUN")
       if type(self.input) is str:
         raw_answer = self.current_agent.talk(self.input)
       elif type(self.input) is dict: 
@@ -52,6 +57,7 @@ class AbstractFlow:
       else:
         raise TypeError("flow->input type must be str or dict")
 
+      logger.info(f"flow: raw_answer: {raw_answer}")
       answer = ParseResponse(raw_answer)
       command_name, args = self.parse_command(answer)
       command = command_name.upper()

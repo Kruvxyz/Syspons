@@ -92,5 +92,5 @@ example if cannot evaluate text:
 }
 Ensure the response can be parsed by Python json.loads
     """
-agent_ukraine_war = Agent(ai=config.ai, system_prompt=system_message, commands=[])
+agent_ukraine_war = Agent("UKRAINE_WAR", ai=config.ai, system_prompt=system_message, commands=[])
      

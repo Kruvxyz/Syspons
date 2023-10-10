@@ -77,5 +77,5 @@ example for flag command:
 
 Ensure the response can be parsed by Python json.loads
     """
-agent_mind = Agent(ai=config.ai, system_prompt=system_message, commands=[])
+agent_mind = Agent("MIND", ai=config.ai, system_prompt=system_message, commands=[])
      

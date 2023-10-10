@@ -53,4 +53,4 @@ example when text information is not clear:
 
 Ensure the response can be parsed by Python json.loads
     """
-agent_prase_stocks = Agent(ai=config.ai, system_prompt=system_message, commands=[])
+agent_prase_stocks = Agent("PARSE_STOKES", ai=config.ai, system_prompt=system_message, commands=[])

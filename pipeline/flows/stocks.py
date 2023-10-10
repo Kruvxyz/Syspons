@@ -144,7 +144,7 @@ example when text information is not clear:
 
 Ensure the response can be parsed by Python json.loads
     """
-    return Agent(ai=ai, system_prompt=system_message, commands=[])
+    return Agent("STOKES", ai=ai, system_prompt=system_message, commands=[])
 
 # agent = gen_agent_parse_stocks(openai)
 # flow = FlowStocks(config, agents={"init": agent})

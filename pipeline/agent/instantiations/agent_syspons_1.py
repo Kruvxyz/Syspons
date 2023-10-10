@@ -92,7 +92,7 @@ example if cannot evaluate text:
 }
 Ensure the response can be parsed by Python json.loads
     """
-syspons_agent_1 = Agent(
+syspons_agent_1 = Agent("SYSPONS_1",
     ai=config.ai, system_prompt=system_message, commands=[])
 
 
