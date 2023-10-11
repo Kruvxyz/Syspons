@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from pipeline.flows.agi import Consciousness
 from pipeline.config.config import config
 from pipeline.shared_content import logger
+from pipeline.shared_content import agents
 
 
 load_dotenv()
@@ -16,6 +17,11 @@ config.ai = openai
 from pipeline.agent.agi.simulation import agent_simulation
 from pipeline.agent.agi.thought import agent_thought
 from pipeline.agent.agi.mind import agent_mind
+
+logger.info("set shared content")
+agents["MIND"] = agent_mind
+agents["THINK"] = agent_thought
+agents["SIMULATION"] = agent_simulation
 
 logger.info("set background flow")
 flow = Consciousness(config, agents={"MIND": agent_mind, "THINK": agent_thought,

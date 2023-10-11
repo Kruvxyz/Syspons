@@ -19,3 +19,4 @@ class Status:
 
 
 status = Status()
+agents = {}

@@ -68,3 +68,9 @@ class Agent:
   def train(self, *args, **kwargs) -> None:
       # TODO(guyhod): future / empty interface for now
       pass
+  
+  def get_system_prompt(self) -> str:
+     return self.system_prompt
+  
+  def set_system_prompt(self, system_prompt: str) -> None:
+     self.system_prompt = system_prompt
