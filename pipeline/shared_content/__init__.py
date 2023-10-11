@@ -20,3 +20,5 @@ class Status:
 
 status = Status()
 agents = {}
+history = []
+current_chat = []
