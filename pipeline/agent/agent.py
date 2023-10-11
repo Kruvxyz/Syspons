@@ -28,12 +28,16 @@ class Agent:
         self.answer_max_tokens if self.answer_max_tokens else 0
     )
 
+  def prepare_agent_prompt(self, user_input: str, user_data: Optional[Dict[str, str]] = None):
+    if self.prompt_generator and user_data:
+      user_input = self.prompt_generator(user_data)
+    return user_input
+  
   def talk(self, user_input: str, user_data: Optional[Dict[str, str]] = None, answer_max_tokens: Optional[int] = None) -> str:
     logger.info(f"Agent:{self.name}: talk")
-    if self.prompt_generator and user_data:
-        user_input = self.prompt_generator(user_data)
+    agent_prompt = self.prepare_agent_prompt(user_input, user_data)
 
-    logger.info(f"Agent:{self.name}: talk-this: {user_input}")
+    logger.info(f"Agent:{self.name}: talk-this: {agent_prompt}")
     if answer_max_tokens or self.answer_max_tokens:
         max_tokens = self.answer_max_tokens if self.answer_max_tokens else 0
         max_tokens = answer_max_tokens if answer_max_tokens else max_tokens
@@ -41,7 +45,7 @@ class Agent:
           model=config.model,
           messages=[
                 {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": user_input},
+                {"role": "user", "content": agent_prompt},
             ],
           max_tokens=max_tokens
         )
@@ -51,7 +55,7 @@ class Agent:
         model=config.model,
         messages=[
               {"role": "system", "content": self.system_prompt},
-              {"role": "user", "content": user_input},
+              {"role": "user", "content": agent_prompt},
           ]
       )
     logger.info(f"Agent:{self.name}: talk-response: {str(resp)}")

@@ -1,6 +1,6 @@
 from pipeline.flows.abstract.generic_flow import AbstractFlow
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from pipeline.shared_content import status
+from pipeline.shared_content import current_chat, history, status
 
 
 # Flow:
@@ -96,6 +96,11 @@ class Consciousness(AbstractFlow):
       #fixme(guyhod) - keep going here...
 
     elif current_agent == "MIND":
+      # Update shared content
+      if command != "CONTINUE":
+        history.append(current_chat)
+        current_chat = []
+
       if command == "CONTINUE":
         # self.current_agent = self.input["next"]
         self.current_agent = self.agent_dict["SIMULATION"]

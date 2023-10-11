@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from pipeline.functions import ParseResponse
-from pipeline.shared_content import logger
+from pipeline.shared_content import current_chat, logger
 import os.path as path
 
 class AbstractFlow:
@@ -51,8 +51,10 @@ class AbstractFlow:
     while self.state == self.config.STATE_RUN:
       logger.info("flow: state: STATE_RUN")
       if type(self.input) is str:
+        prompt = self.current_agent.prepare_agent_prompt(self.input)
         raw_answer = self.current_agent.talk(self.input)
       elif type(self.input) is dict: 
+        prompt = self.current_agent.prepare_agent_prompt("", self.input)
         raw_answer = self.current_agent.talk("", self.input)
       else:
         raise TypeError("flow->input type must be str or dict")
@@ -66,6 +68,11 @@ class AbstractFlow:
       print(f"command: {command}")
       print(f"args: {str(args)}")
       print("--------------------------------------")
+      current_chat.append({
+        "agent": self.agent_dict[self.current_agent],
+        "system": self.current_agent.system_prompt,
+        "prompt": prompt,
+        "response": answer})
       self.execute(answer)
     return None
 

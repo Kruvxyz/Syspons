@@ -40,5 +40,25 @@ class TestAgentInterface(unittest.TestCase):
         agent.reset()
         self.assertEqual(agent.history, [])
 
+    def test_prepare_agent_prompt_with_input(self):
+        user_input = "test"
+
+        ai_interface = AIInterface("test")
+        agent = Agent("TEST", ai=ai_interface, system_prompt="test", commands=[])
+        prompt = agent.prepare_agent_prompt(user_input)
+
+        self.assertEqual(prompt, user_input)
+    
+    def test_prepare_agent_prompt_with_data(self):
+        user_input = "not this"
+        user_data = {"test": "input"}
+        expected_prompt = "this!"
+
+        ai_interface = AIInterface("test")
+        agent = Agent("TEST", ai=ai_interface, system_prompt="test", commands=[], prompt_generator=lambda x: expected_prompt)
+        prompt = agent.prepare_agent_prompt(user_input, user_data)
+        
+        self.assertEqual(prompt, expected_prompt)
+    
 if __name__ == '__main__':
     unittest.main()
