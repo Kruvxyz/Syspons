@@ -28,7 +28,7 @@ class Agent:
         self.answer_max_tokens if self.answer_max_tokens else 0
     )
 
-  def prepare_agent_prompt(self, user_input: str, user_data: Optional[Dict[str, str]] = None):
+  def prepare_agent_prompt(self, user_input: str, user_data: Optional[Dict[str, str]] = None) -> str:
     if self.prompt_generator and user_data:
       user_input = self.prompt_generator(user_data)
     return user_input
