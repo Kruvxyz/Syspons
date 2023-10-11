@@ -24,5 +24,4 @@ agents["THINK"] = agent_thought
 agents["SIMULATION"] = agent_simulation
 
 logger.info("set background flow")
-flow = Consciousness(config, agents={"MIND": agent_mind, "THINK": agent_thought,
-                     "SIMULATION": agent_simulation}, api="OPENAI", observation=None)
+flow = Consciousness(config, agents=agents, api="OPENAI", observation=None)
