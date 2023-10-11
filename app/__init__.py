@@ -3,12 +3,10 @@ from flask_cors import CORS, cross_origin
 from pipeline.shared_content import status, agents
 from app.background_flow import flow
 import threading
-import os
-from dotenv import load_dotenv
+from app.functions import api_code_validation
+from pipeline.shared_content import logger
 
 
-load_dotenv()
-API_CODE = os.getenv("API_CODE", "")
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -29,27 +27,23 @@ def agent():
 
 @app.route('/get_system_prompt', methods=['POST', 'GET'])
 @cross_origin()
+@api_code_validation
 def agent_get_system_prompt():
     data = request.get_json()
-    api_code = data.get('api_code', None)
     agent = data.get('agent', None)
-    if api_code != API_CODE:
-        return jsonify({"status": "failed"})
-    
     return jsonify({"status": "ok", "content": agents.get(agent).get_system_prompt()})
 
 @app.route('/set_system_prompt', methods=['POST', 'GET'])
 @cross_origin()
+@api_code_validation
 def agent_set_system_prompt():
     data = request.get_json()
-    api_code = data.get('api_code', None)
     agent = data.get('agent', None)
     content = data.get('content', None)
-    if api_code != API_CODE:
-        return jsonify({"status": "failed"})
     
     if not content:
         return jsonify({"status": "failed"})
     
+    logger.info(f"agent {agent} system prompt change to:\n{content}")
     agents.get(agent).set_system_prompt(content)
     return jsonify({"status": "ok"})
