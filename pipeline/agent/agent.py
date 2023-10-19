@@ -14,7 +14,8 @@ class Agent:
     ) -> None:
     logger.info(f"Agent:{name}: Initiate")
     self.name = name
-    self.ai = ai
+    self.ai_provider = ai.get("provider", "openai")
+    self.ai = ai["ai"]
     self.commands = commands
     self.system_prompt = system_prompt
     self.prompt_generator = prompt_generator
@@ -22,6 +23,46 @@ class Agent:
     self.history = []
     logger.info(f"Agent:{self.name}: Initiate done")
 
+  def llm(self, agent_prompt, answer_max_tokens:int = None) -> str:
+    """
+    Connect to LLM and return response as string
+    """
+    if self.ai_provider=="openai":
+      if answer_max_tokens or self.answer_max_tokens:
+          max_tokens = self.answer_max_tokens if self.answer_max_tokens else 0
+          max_tokens = answer_max_tokens if answer_max_tokens else max_tokens
+          resp = self.ai.ChatCompletion.create(
+            model=config.model,
+            messages=[
+                  {"role": "system", "content": self.system_prompt},
+                  {"role": "user", "content": agent_prompt},
+              ],
+            max_tokens=max_tokens
+          )
+
+      else:
+        resp = self.ai.ChatCompletion.create(
+          model=config.model,
+          messages=[
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": agent_prompt},
+            ]
+        )
+      logger.info(f"Agent:{self.name}: talk-response: {str(resp)}")
+      return resp["choices"][0]["message"]["content"]
+    
+    elif self.ai_provider=="llama2":
+      resp = self.ai.query(system_prompt=self.system_prompt, agent_prompt=agent_prompt)
+      generated_text = resp['answer'][0]['generated_text']
+      print(f"resp: {str(resp)}")
+      print(f"text: {generated_text[generated_text.find('[/INST]')+8:]}")
+      logger.info(f"Agent:{self.name}: talk-response: {str(resp)}")
+      return generated_text[generated_text.find("[/INST]")+8:]
+
+    else:
+       raise ValueError("ai provider must be openai or llama2")
+        
+     
   def get_expected_converation_tokens(self) -> int:
     #fixme(guyhod): for this project we don't have memory, when memory will be added it should be part of calculation
     return count_tokens(self.system_prompt) + (
@@ -38,28 +79,7 @@ class Agent:
     agent_prompt = self.prepare_agent_prompt(user_input, user_data)
 
     logger.info(f"Agent:{self.name}: talk-this: {agent_prompt}")
-    if answer_max_tokens or self.answer_max_tokens:
-        max_tokens = self.answer_max_tokens if self.answer_max_tokens else 0
-        max_tokens = answer_max_tokens if answer_max_tokens else max_tokens
-        resp = self.ai.ChatCompletion.create(
-          model=config.model,
-          messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": agent_prompt},
-            ],
-          max_tokens=max_tokens
-        )
-
-    else:
-      resp = self.ai.ChatCompletion.create(
-        model=config.model,
-        messages=[
-              {"role": "system", "content": self.system_prompt},
-              {"role": "user", "content": agent_prompt},
-          ]
-      )
-    logger.info(f"Agent:{self.name}: talk-response: {str(resp)}")
-    return resp["choices"][0]["message"]["content"]
+    return self.llm(agent_prompt=agent_prompt, answer_max_tokens=answer_max_tokens)
 
   def push_message(self, message: Dict[str, str]) -> None:
       logger.info(f"Agent:{self.name}: push_message: {str(message)}")

@@ -1,12 +1,13 @@
 """Syspons FSM : a system to summary and answear documents"""
 from pipeline.config.config import config
-from pipeline.flows.main_flow import Flow1Domain
+# from pipeline.flows.main_flow import Flow1Domain
 from pipeline.flows.simple_flow_2 import OneStepFlow
 from pipeline.functions import count_tokens
 from pipeline.agent.agent import Agent
 from pipeline.agent.resources import gen_system_message
 from pipeline.functions.ParseWord import headers, parse_docx, chunk_dict, chunk_dict_with_headers
 from pipeline.functions.FilesInFolder import get_files
+from pipeline.functions.LlamaAsyncInterface import LlamaAsyncInterface
 import click
 import os
 import os.path as path
@@ -16,9 +17,11 @@ import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader 
 
+from pipeline.shared_content import status
 
 
 load_dotenv()
+config.ai["provider"] = os.getenv("LLM_PROVIDER")
 config.open_ai_key = os.getenv("API_KEY", "")
 config.model = os.getenv("OPENAI_MODEL", "gpt-4")
 
@@ -49,6 +52,7 @@ config.model = os.getenv("OPENAI_MODEL", "gpt-4")
     help="name of output file",
 )
 def main(file: str, folder: str, output: str, file_type: str) -> None:
+    status.status="run"
     if len(file)==0:
         files = get_files(folder, filter=file_type)
         config.set_filenames(files)
@@ -56,8 +60,13 @@ def main(file: str, folder: str, output: str, file_type: str) -> None:
         doc_path = path.join("documents/", file)
         config.set_filenames([doc_path])
     config.set_output_filename(output)
-    openai.api_key = config.open_ai_key
-    config.ai = openai
+
+    if config.ai["provider"] == 'openai':
+        openai.api_key = config.open_ai_key
+        config.ai["ai"] = openai
+    elif config.ai["provider"] == 'llama2':
+        ai_server = os.getenv("LLAMA_ADDRESS")
+        config.ai["ai"] = LlamaAsyncInterface(ai_server=ai_server)
     
     from pipeline.agent.instantiations.agent_syspons_1 import syspons_agent_1
 

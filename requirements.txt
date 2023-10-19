@@ -3,6 +3,7 @@ openai
 tiktoken
 click
 PyPDF2 
+requests==2.31.0
 
 # rest api
 flask==2.3.2
