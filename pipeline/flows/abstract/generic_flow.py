@@ -1,5 +1,5 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from pipeline.functions import ParseResponse
+from pipeline.functions.ParseToJson import loadString
 from pipeline.shared_content import current_chat, logger
 import os.path as path
 
@@ -60,7 +60,7 @@ class AbstractFlow:
         raise TypeError("flow->input type must be str or dict")
 
       logger.info(f"flow: raw_answer: {raw_answer}")
-      answer = ParseResponse(raw_answer)
+      answer = loadString(raw_answer, self.current_agent.response_format)
       command_name, args = self.parse_command(answer)
       command = command_name.upper()
       print(f"------------------{self.agent_dict[self.current_agent]}--------------------")

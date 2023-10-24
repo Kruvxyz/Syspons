@@ -92,8 +92,9 @@ example if cannot evaluate text:
 }
 Ensure the response can be parsed by Python json.loads
     """
+format = {"thoughts": {"reasoning": "The text is very should and I can\'t understand the context and can\'t find meaningful keywords to help me make a decision.", "criticism": "I should avoid making assumption about text.", "speak": "I choose command \'flag\' since text context is unclear and I should avoid making assumptions about text."}, "command": {"name": "flag", "args": {"reasoning": "Text context is unclear"}}}
 syspons_agent_1 = Agent("SYSPONS_1",
-    ai=config.ai, system_prompt=system_message, commands=[])
+    ai=config.ai, system_prompt=system_message, commands=[], format=format)
 
 
 # answer: "Give score for of the relevance of the project detailed in arge", args: "Score": "<A score of the assessment dimensions of relevance>"

@@ -10,7 +10,8 @@ class Agent:
                commands: List["Command"],
                system_prompt: str,
                prompt_generator: Optional[Callable[[Dict[str, str]], str]] = None,
-               answer_max_tokens: Optional[int] = None
+               answer_max_tokens: Optional[int] = None,
+               format: Dict[str, str]={}
     ) -> None:
     logger.info(f"Agent:{name}: Initiate")
     self.name = name
@@ -22,6 +23,7 @@ class Agent:
     self.prompt_generator = prompt_generator
     self.answer_max_tokens = answer_max_tokens
     self.history = []
+    self.response_format = format
     logger.info(f"Agent:{self.name}: Initiate done")
 
   def llm(self, agent_prompt, answer_max_tokens:int = None) -> str:
