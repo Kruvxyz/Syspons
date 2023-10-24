@@ -1,0 +1,14 @@
+from pipeline.agent.agent import Agent
+from pipeline.config.config import config
+import openai
+
+openai.api_key = config.open_ai_key
+
+ai_config = {
+    "ai": openai, "provider": 'openai', "model": "gpt-3.5-turbo"
+}
+
+system_prompt = """You are an helpful assistant, complete every task you are given."""
+
+magic_assistant = Agent("helpful_assistant",
+    ai=ai_config, system_prompt=system_prompt, commands=[])

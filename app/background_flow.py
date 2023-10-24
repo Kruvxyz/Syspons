@@ -13,6 +13,7 @@ load_dotenv()
 config.ai["provider"] = os.getenv("LLM_PROVIDER")
 config.open_ai_key = os.getenv("API_KEY", "")
 config.model = os.getenv("OPENAI_MODEL", "gpt-4")
+config.ai["model"] = config.model
 
 if config.ai["provider"] == 'openai':
     openai.api_key = config.open_ai_key

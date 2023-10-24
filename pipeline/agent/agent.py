@@ -15,6 +15,7 @@ class Agent:
     logger.info(f"Agent:{name}: Initiate")
     self.name = name
     self.ai_provider = ai.get("provider", "openai")
+    self.ai_model = ai.get("model", config.model)
     self.ai = ai["ai"]
     self.commands = commands
     self.system_prompt = system_prompt
@@ -32,7 +33,7 @@ class Agent:
           max_tokens = self.answer_max_tokens if self.answer_max_tokens else 0
           max_tokens = answer_max_tokens if answer_max_tokens else max_tokens
           resp = self.ai.ChatCompletion.create(
-            model=config.model,
+            model=self.ai_model,
             messages=[
                   {"role": "system", "content": self.system_prompt},
                   {"role": "user", "content": agent_prompt},
@@ -42,7 +43,7 @@ class Agent:
 
       else:
         resp = self.ai.ChatCompletion.create(
-          model=config.model,
+          model=self.ai_model,
           messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": agent_prompt},
