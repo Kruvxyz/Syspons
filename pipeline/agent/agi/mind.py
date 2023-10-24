@@ -80,4 +80,4 @@ Ensure the response can be parsed by Python json.loads
 format = {"thoughts": {"reasoning": "reasoning", "criticism": "constructive self-criticism",
                        "speak": "thoughts summary"}, "command": {"name": "command name", "args": {"arg name": "value"}}}
 agent_mind = Agent("MIND", ai=config.ai, system_prompt=system_message, commands=[],
-                   format=format)
+                   format=format, save_to_history=True, history_len=10)

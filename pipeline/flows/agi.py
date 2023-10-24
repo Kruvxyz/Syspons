@@ -55,7 +55,7 @@ class Consciousness(AbstractFlow):
 
   def clear(self) -> None:
     self.agent_dict["THINK"].reset()
-    self.agent_dict["SIMULATION"].rese()
+    self.agent_dict["SIMULATION"].reset()
     self.agent_dict["MIND"].reset()
     self.pre_execute_loop()
     self.mem = []
