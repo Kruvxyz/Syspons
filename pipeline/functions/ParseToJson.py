@@ -14,7 +14,7 @@ def loadString(text: str, format: Dict[str, str] = None, attemps: int = 3) -> Di
     for i in range(attemps):
         logger.info(f"attemp {i} to parse {text}")
         try:
-            parsed_response = json.loads(text_to_parse)
+            parsed_response = json.loads(text_to_parse, strict=False)
             return parsed_response
 
         except:
