@@ -13,3 +13,7 @@ singleton-decorator==1.0.0
 # internet support
 bs4
 selenium
+
+# vectorDB
+chromadb==0.3.29
+langchain
