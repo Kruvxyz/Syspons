@@ -18,7 +18,7 @@ from pipeline.shared_content import current_chat, history, status
 #       "next": self.agents["init"],  # Temporary thing
 #       "situation": self.observation.get(),
 #       "content": content
-
+import time
 
 class Consciousness(AbstractFlow):
   def __init__(self,
@@ -29,7 +29,7 @@ class Consciousness(AbstractFlow):
     ) -> None:
     super().__init__(config)
     self.agents = agents
-    self.current_agent = self.agents.get("SIMULATION", None)
+    self.current_agent = self.agents.get("DM", None)
     assert type(self.current_agent) != type(None), "Failed to load initial agent"
 
     self.input = ""
@@ -39,28 +39,33 @@ class Consciousness(AbstractFlow):
     self.api = api
     self.observation = observation
 
-  def pre_execute_loop(self, content: str) -> None:
+  def pre_execute_loop(self, content: str = "") -> None:
     """
     Update self params befor executing loop
     """
     self.input = {
+      "first_run": True,
       "on_hold": {},
-      "next": self.agents["THINK"], 
+      "text": "",
+      "next": self.agents["THOUGHT_FACTORY"], 
       "situation": "", #self.observation.get(),
-      "content": content
+      "content": content,
+      "prediction" : ""
     }
-    self.current_agent = self.agents["SIMULATION"]
+    self.current_agent = self.agents["DM"]
     self.state = self.config.STATE_RUN
     status.status = self.config.STATE_RUN
 
   def clear(self) -> None:
-    self.agent_dict["THINK"].reset()
+    self.agent_dict["THOUGHT_FACTORY"].reset()
     self.agent_dict["SIMULATION"].reset()
-    self.agent_dict["MIND"].reset()
+    self.agent_dict["GATE_KEEPER"].reset()
+    self.agent_dict["DM"].reset()
     self.pre_execute_loop()
     self.mem = []
     #fixme(guyhod) - fill function
-    #...
+    #... --> is there something else i need to do here?
+    # consider closing this
 
   def execute(self, data: Dict[str,Any]) -> None:
     """
@@ -68,84 +73,106 @@ class Consciousness(AbstractFlow):
     """
     current_agent = self.agent_dict[self.current_agent].upper()
     status.agent = current_agent
-    command_name, args = self.parse_command(data)
-    command = command_name.upper()
+    # time.sleep(60) # save guard from OPENAI token limitation
 
-    if current_agent == "THINK":
-      # agent will make a suggestion
-      if command == "ASK" or command == "SUGGEST":
-        self.input["on_hold"] = data
-        self.current_agent = self.agents["MIND"]
-        self.input["next"] = self.agents["SIMULATION"]
-        self.mem.append({"THINK": data})
-        if command == "ASK":
-          self.input["content"] = f"You should simulate a response for: {args['question']}"
-        elif command == "SUGGEST":
-          self.input["content"] = f"YOu should simulate a response for this action: {args['suggestion']}"
+    if current_agent == "THOUGHT_FACTORY":
+      reasoning = data.get("reasoning", "")
+      prediction = data.get("prediction", "")
+      action = data["action"]
 
-      elif command == self.config.COMMAND_FLAG:
-        pass
+      content = f"""
+action: 
+{action}
 
-      else:
-        pass
+reasoning: 
+{reasoning}
+"""
+      self.input["content"] = content
+
+      print(action)
+      self.current_agent = self.agents["SIMULATION"]
+
 
     elif current_agent == "SIMULATION":
-      # agent will simulate outcame based on thinking and current state
-      self.mem.append({"SIMULATION": data})
-      self.current_agent = self.agents["THINK"]
-      #fixme(guyhod) - keep going here...
+      prediction = data["prediction"]
+      # self.mem.append({"SIMULATION": data})
 
-    elif current_agent == "MIND":
-      # Update shared content
-      if command != "CONTINUE":
-        history.append(current_chat)
-        current_chat = []
+      self.input["prediction"] = prediction
 
-      if command == "CONTINUE":
+      print(prediction)
+      self.current_agent = self.agents["GATE_KEEPER"]
+
+    elif current_agent == "GATE_KEEPER":
+      command_name, args = self.parse_command(data)
+      command = command_name.upper()
+      question = data.get("question", "")
+
+      if command == "REFLECT":
+        # history.append(current_chat)
+        # current_chat = []
+        content = self.input["content"]
+        self.input["text"] = f"""
+based on your:
+{content}
+
+
+Try to convince me by answering this question:
+{question}
+        """
+
+        self.current_agent = self.agents["THOUGHT_FACTORY"]
+
+
+      if command == "EXECUTE":
         # self.current_agent = self.input["next"]
-        self.current_agent = self.agent_dict["SIMULATION"]
         #fixme(guyhod) - should parse this based on next agent
-        self.pre_execute_loop()
-        self.input["content"] = self.input["on_hold"]
+        # self.pre_execute_loop()
+        # self.input["content"] = self.input["on_hold"]
 
-      elif command == "SELECT":
+        # nothing to do
+        self.input["text"] = ""
+        self.current_agent = self.agents["DM"]
+
+
+      elif command == "AVOID":
         # self.api.execute(self.input["on_hold"], self.mem)
-        self.agent_dict["THINK"].trian()
-        self.pre_execute_loop()
+        # self.agent_dict["THINK"].trian()
+        # self.pre_execute_loop()
 
-      elif command == "NEXT":
-        self.clear()
+        self.input["text"] = ""          
+        self.input["content"] = "Player did nothing"
+        self.current_agent = self.agents["DM"]
+
+
 
       else:
-        pass
+        # punish
+        self.input["text"] = ""          
+        self.input["content"] = "Player did nothing"
+        self.current_agent = self.agents["DM"]
+
+        print("fail to call command, rerun")
+        #fixme: should add a critic here
+
+    elif current_agent == "DM":
+      Previously = data.get("Previously", "")
+      now = data.get("now", "")
+      options = data.get("options", "")
+
+      self.input["first_run"] = False
+      self.input["situation"] = f""" 
+Previously:
+{Previously}
+
+The situation is:
+{now}
+
+Your options are:
+{options}
+"""
+      self.input["text"] = ""
+      print(now)
+      self.current_agent = self.agents["THOUGHT_FACTORY"]
 
     else:
       print("rerun...")
-
-
-    # ### EXAMPLE
-    #
-    # command_name, args = self.parse_command(data)
-    # command = command_name.upper()
-    #
-    # if command == self.config.COMMAND_END_FLOW:
-    #   self.state = self.config.STATE_CONTINUE
-    #
-    # elif command == self.config.COMMAND_FLAG:
-    #   print(f"""Flag content {args}""")
-    #   self.state = self.config.STATE_CONTINUE
-    #
-    # elif command == self.config.COMMAND_STORE_AND_END_FLOW:
-    #   self.append_to_file(args.get("summary", ""))
-    #   self.state = self.config.STATE_CONTINUE
-    #
-    # elif command == self.config.COMMAND_SUMMARY:
-    #   self.current_agent = self.agents["questions"]
-    #
-    # elif command == self.config.COMMAND_ANSWER:
-    #   self.append_to_file(str(args))
-    #   self.state = self.config.STATE_CONTINUE
-    #
-    # else:
-    #   print(f"undefined command {command} with content {args}")
-    #   print("rerun...")

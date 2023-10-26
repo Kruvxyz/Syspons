@@ -22,14 +22,13 @@ elif config.ai["provider"] == 'llama2':
     ai_server = os.getenv("LLAMA_ADDRESS")
     config.ai["ai"] = LlamaAsyncInterface(ai_server=ai_server)
     
-from pipeline.agent.agi.simulation import agent_simulation
-from pipeline.agent.agi.thought import agent_thought
-from pipeline.agent.agi.mind import agent_mind
+from pipeline.agent.agi import agent_simulation, agent_thought_factory, agent_gate_keepr, agent_dm
 
 logger.info("set shared content")
-agents["MIND"] = agent_mind
-agents["THINK"] = agent_thought
+agents["GATE_KEEPER"] = agent_gate_keepr
+agents["THOUGHT_FACTORY"] = agent_thought_factory
 agents["SIMULATION"] = agent_simulation
+agents["DM"] = agent_dm
 
 logger.info("set background flow")
 flow = Consciousness(config, agents=agents, api="OPENAI", observation=None)

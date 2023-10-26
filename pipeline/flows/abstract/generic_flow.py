@@ -35,11 +35,12 @@ class AbstractFlow:
   #   """
   #   return 0
   
-  def run(self, content: str = "") -> Optional[str]:
+  def run(self, content: str = "", prints: bool = True) -> Optional[str]:
     """Execute FSM
 
     Args:
       content (str): flow initial text
+      prints (bool): print agent process
 
     Returns:
       TBD
@@ -52,21 +53,23 @@ class AbstractFlow:
       logger.info("flow: state: STATE_RUN")
       if type(self.input) is str:
         prompt = self.current_agent.prepare_agent_prompt(self.input)
-        raw_answer = self.current_agent.talk(self.input)
       elif type(self.input) is dict: 
         prompt = self.current_agent.prepare_agent_prompt("", self.input)
-        raw_answer = self.current_agent.talk("", self.input)
       else:
         raise TypeError("flow->input type must be str or dict")
 
+      raw_answer = self.current_agent.talk(prompt)
+
       logger.info(f"flow: raw_answer: {raw_answer}")
       answer = loadString(raw_answer, self.current_agent.response_format)
-      command_name, args = self.parse_command(answer)
-      command = command_name.upper()
       print(f"------------------{self.agent_dict[self.current_agent]}--------------------")
-      print(f"thoughts: {answer.get('thoughts')}")
-      print(f"command: {command}")
-      print(f"args: {str(args)}")
+      print(answer)
+      if prints:
+        command_name, args = self.parse_command(answer)
+        command = command_name.upper()
+        print(f"thoughts: {answer.get('thoughts')}")
+        print(f"command: {command}")
+        print(f"args: {str(args)}")
       print("--------------------------------------")
       current_chat.append({
         "agent": self.agent_dict[self.current_agent],
@@ -93,15 +96,21 @@ class AbstractFlow:
 
     Args:
       data (json): AI answer formatted as Json
+      sensitive: raise alert if no command in data
 
     Returns:
         Command (str): Next action
         Args Dict[str, str]: argument with key values and values
 
     """
-    command_dict = data.get("command")
+    command_dict = data.get("command", "")
     assert "name" in command_dict
-    return command_dict["name"], command_dict.get("args", {})
+    command_name = command_dict["name"]
+    # verify command is one word:
+    command_name_list = command_name.split()
+    if  len(command_name_list) > 1:
+      command_name = command_name_list[0]
+    return command_name, command_dict.get("args", {})
 
   def execute(self, data: Dict[str,Any]) -> None:
     """Execute command

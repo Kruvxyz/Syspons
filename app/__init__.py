@@ -10,7 +10,7 @@ from pipeline.shared_content import logger
 app = Flask(__name__)
 cors = CORS(app)
 
-pipeline = threading.Thread(target=flow.run, args=(""))
+pipeline = threading.Thread(target=flow.run, kwargs={"prints": False})
 pipeline.start()
 
 

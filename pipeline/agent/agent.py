@@ -1,4 +1,7 @@
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple
+
+import openai
 from pipeline.functions import count_tokens
 from pipeline.config.config import config
 from pipeline.shared_content import logger
@@ -92,11 +95,22 @@ class Agent:
     return user_input
   
   def talk(self, user_input: str, user_data: Optional[Dict[str, str]] = None, answer_max_tokens: Optional[int] = None, history_len: int = None) -> str:
+    # fixme: user_data seems redundent amd user_input should named user_prompt
     logger.info(f"Agent:{self.name}: talk")
-    user_prompt = self.prepare_agent_prompt(user_input, user_data)
+    # user_prompt = self.prepare_agent_prompt(user_input, user_data)
+    user_prompt = user_input
 
     logger.info(f"Agent:{self.name}: talk-this: {user_prompt}")
-    agent_response = self.llm(agent_prompt=user_prompt, answer_max_tokens=answer_max_tokens, history_len=history_len)
+    for i in range(3):
+      try:
+        agent_response = self.llm(agent_prompt=user_prompt, answer_max_tokens=answer_max_tokens, history_len=history_len)
+        break
+      except Exception as e:
+        if i==2:
+          raise e
+        logger.warning(f"Agent:{self.name} - attemp {i} fail to query LLM")
+        time.sleep(30)
+        
     if self.save_to_history:
        self.push_message({
         "role": "user",
