@@ -19,6 +19,7 @@ def api_code_validation(function):
         data = request.get_json()
         api_code = data.get('api_code', None)
         if api_code != API_CODE:
+            print(api_code)
             logger.warning("api_key auth failed")
             return jsonify({"status": "failed"})
 

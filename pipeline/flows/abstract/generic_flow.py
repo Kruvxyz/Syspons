@@ -1,6 +1,7 @@
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from pipeline.functions.ParseToJson import loadString
-from pipeline.shared_content import current_chat, logger
+from pipeline.shared_content import current_chat, logger, status
 import os.path as path
 
 class AbstractFlow:
@@ -49,34 +50,48 @@ class AbstractFlow:
     self.pre_execute_loop(content)
     logger.info("flow: run pre_execute_loop complete")
 
-    while self.state == self.config.STATE_RUN:
-      logger.info("flow: state: STATE_RUN")
-      if type(self.input) is str:
-        prompt = self.current_agent.prepare_agent_prompt(self.input)
-      elif type(self.input) is dict: 
-        prompt = self.current_agent.prepare_agent_prompt("", self.input)
+    while True:
+      force_state = status.get_state()
+      if force_state is not None:
+        self.state = force_state
+        status.clean_state()
+      logger.info(f"flow: state: {self.state}")
+
+      if self.state == self.config.STATE_RUN:
+        if type(self.input) is str:
+          prompt = self.current_agent.prepare_agent_prompt(self.input)
+        elif type(self.input) is dict: 
+          prompt = self.current_agent.prepare_agent_prompt("", self.input)
+        else:
+          raise TypeError("flow->input type must be str or dict")
+
+        raw_answer = self.current_agent.talk(prompt)
+
+        logger.info(f"flow: raw_answer: {raw_answer}")
+        answer = loadString(raw_answer, self.current_agent.response_format)
+        print(f"------------------{self.agent_dict[self.current_agent]}--------------------")
+        print(answer)
+        if prints:
+          command_name, args = self.parse_command(answer)
+          command = command_name.upper()
+          print(f"thoughts: {answer.get('thoughts')}")
+          print(f"command: {command}")
+          print(f"args: {str(args)}")
+        print("--------------------------------------")
+        current_chat.append({
+          "agent": self.agent_dict[self.current_agent],
+          "system": self.current_agent.system_prompt,
+          "prompt": prompt,
+          "response": answer})
+        self.execute(answer)
+
+      elif self.state == self.config.STATE_PAUSE:
+        logger.info("flow: state: STATE_PAUSE")
+        time.sleep(60)
+
       else:
-        raise TypeError("flow->input type must be str or dict")
+        break
 
-      raw_answer = self.current_agent.talk(prompt)
-
-      logger.info(f"flow: raw_answer: {raw_answer}")
-      answer = loadString(raw_answer, self.current_agent.response_format)
-      print(f"------------------{self.agent_dict[self.current_agent]}--------------------")
-      print(answer)
-      if prints:
-        command_name, args = self.parse_command(answer)
-        command = command_name.upper()
-        print(f"thoughts: {answer.get('thoughts')}")
-        print(f"command: {command}")
-        print(f"args: {str(args)}")
-      print("--------------------------------------")
-      current_chat.append({
-        "agent": self.agent_dict[self.current_agent],
-        "system": self.current_agent.system_prompt,
-        "prompt": prompt,
-        "response": answer})
-      self.execute(answer)
     return None
 
   def pre_execute_loop(self, content: str) -> None:

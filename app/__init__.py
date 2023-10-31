@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from pipeline.shared_content import agents, current_chat, history, status
+from pipeline.shared_content import agents, current_chat, history, status, logger
 from app.background_flow import flow
 import threading
 from app.functions import api_code_validation
-from pipeline.shared_content import logger
+from pipeline.config.config import config
 
 
 app = Flask(__name__)
@@ -70,3 +70,17 @@ def get_history():
 @api_code_validation
 def get_current_chat():
     return jsonify({"status": "ok", "chat": current_chat})
+
+@app.route('/pause', methods=['POST'])
+@cross_origin()
+@api_code_validation
+def pause_game():
+    status.set_state(config.STATE_PAUSE)
+    return jsonify({"status": "ok"})
+
+@app.route('/play', methods=['POST'])
+@cross_origin()
+@api_code_validation
+def play_game():
+    status.set_state(config.STATE_RUN)
+    return jsonify({"status": "ok"})

@@ -41,6 +41,7 @@ class Config:
         self.STATE_RUN = 'RUN'
         self.STATE_CONTINUE = 'CONTINUE'
         self.STATE_NONE = 'NONE'
+        self.STATE_PAUSE = 'PAUSE'
 
         # Commands
         # fixme(guyhod): refactor commands as objects which passes to flow/agent and contain full functionality
